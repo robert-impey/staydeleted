@@ -17,15 +17,19 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/spf13/cobra"
+	"math/rand"
 	"os"
 	"path/filepath"
-
-	"github.com/spf13/cobra"
+	"time"
 )
 
 type ActionForFile struct {
 	file, action string
 }
+
+var NumRepeats int
+var Period int32
 
 // sweepCmd represents the sweep command
 var sweepCmd = &cobra.Command{
@@ -35,39 +39,53 @@ var sweepCmd = &cobra.Command{
 looking for files that have been marked for deletion.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, arg := range args {
-			err := sweep(arg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-			}
-		}
+		sweep(args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(sweepCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// sweepCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// sweepCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	sweepCmd.Flags().IntVarP(&NumRepeats, "repeats", "r", 0, "The number of times to repeat the sweeping.")
+	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600, "The number of seconds in the waiting period. A random time during the period is chosen.")
 }
 
-func sweep(path string) error {
-	stat, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-
-	if stat.IsDir() {
-		return sweepDirectory(path)
+func sweep(paths []string) {
+	if NumRepeats < 1 {
+		sweepPaths(paths)
 	} else {
-		return sweepFrom(path)
+		for i := 0; i < NumRepeats; i++ {
+			firstWait := rand.Int31n(Period)
+			time.Sleep(time.Duration(firstWait) * time.Second)
+			sweepPaths(paths)
+			secondWait := Period - firstWait
+			time.Sleep(time.Duration(secondWait) * time.Second)
+		}
+	}
+}
+
+func sweepPaths(paths []string) {
+	for _, path := range paths {
+
+		stat, err := os.Stat(path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			continue
+		}
+
+		if stat.IsDir() {
+			err := sweepDirectory(path)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
+		} else {
+			err := sweepFrom(path)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			}
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
 	}
 }
 
