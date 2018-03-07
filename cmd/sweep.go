@@ -220,6 +220,10 @@ func sweepDirectory(directoryToSweep string) error {
 				}
 
 				if actionForFile.action == "delete" {
+					if _, err := os.Stat(actionForFile.file); os.IsNotExist(err) {
+						fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
+						continue
+					}
 					fmt.Fprintf(OutWriter, "Deleting '%v'\n", actionForFile.file)
 					filesToDelete = append(filesToDelete, actionForFile.file)
 				} else if actionForFile.action == "keep" {
