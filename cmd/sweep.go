@@ -33,6 +33,8 @@ var NumRepeats int
 var Period int32
 var LogsDir string
 
+var ExpiryMonths int
+
 var OutWriter io.Writer
 var ErrWriter io.Writer
 
@@ -56,6 +58,8 @@ func init() {
 		"The number of seconds in the waiting period. A random time during the period is chosen.")
 	sweepCmd.Flags().StringVarP(&LogsDir, "logs", "l", "logs",
 		"The logs directory for repeated runs.")
+	sweepCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
+		"The number of months before SD files expire.")
 }
 
 func sweep(paths []string) {
@@ -165,6 +169,8 @@ func sweepDirectory(directoryToSweep string) error {
 		return err
 	}
 
+	sdExpiryCutoff := time.Now().AddDate(0, -1*ExpiryMonths, 0)
+
 	fmt.Fprintf(OutWriter, "Sweeping: '%v'\n", absDirectoryToSweep)
 	filesToDelete := make([]string, 0)
 	walker := func(path string, info os.FileInfo, err error) error {
@@ -185,7 +191,27 @@ func sweepDirectory(directoryToSweep string) error {
 				return err
 			}
 
+			// Remove emptied sd folders
+			if len(sdFiles) == 0 {
+				fmt.Fprintf(OutWriter, "Deleting empty SD folder '%s'\n", sdFolder)
+				filesToDelete = append(filesToDelete, sdFolder)
+			}
+
 			for _, sdFile := range sdFiles {
+				sdStat, err := os.Stat(sdFile)
+				if err != nil {
+					fmt.Fprintf(ErrWriter, "%v\n", err)
+					return err
+				}
+
+				if sdStat.ModTime().Before(sdExpiryCutoff) {
+					fmt.Fprintf(OutWriter, "Deleting old SD file '%v' (%s)\n",
+						sdFile,
+						sdStat.ModTime().Format("2006-01-02 15:04:05"))
+					filesToDelete = append(filesToDelete, sdFile)
+					continue
+				}
+
 				fmt.Fprintf(OutWriter, "SD File '%v'\n", sdFile)
 				actionForFile, err := getActionForFile(sdFile, containingFolder)
 				if err != nil {
@@ -194,6 +220,10 @@ func sweepDirectory(directoryToSweep string) error {
 				}
 
 				if actionForFile.action == "delete" {
+					if _, err := os.Stat(actionForFile.file); os.IsNotExist(err) {
+						fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
+						continue
+					}
 					fmt.Fprintf(OutWriter, "Deleting '%v'\n", actionForFile.file)
 					filesToDelete = append(filesToDelete, actionForFile.file)
 				} else if actionForFile.action == "keep" {
