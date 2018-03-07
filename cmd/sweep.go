@@ -1,4 +1,4 @@
-// Copyright © 2018 Rober Impey robert.impey@gmail.com
+// Copyright © 2018 Robert Impey robert.impey@gmail.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,8 +45,10 @@ looking for files that have been marked for deletion.
 
 func init() {
 	rootCmd.AddCommand(sweepCmd)
-	sweepCmd.Flags().IntVarP(&NumRepeats, "repeats", "r", 0, "The number of times to repeat the sweeping.")
-	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600, "The number of seconds in the waiting period. A random time during the period is chosen.")
+	sweepCmd.Flags().IntVarP(&NumRepeats, "repeats", "r", 0,
+		"The number of times to repeat the sweeping.")
+	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600,
+		"The number of seconds in the waiting period. A random time during the period is chosen.")
 }
 
 func sweep(paths []string) {
