@@ -144,7 +144,7 @@ func sweepFrom(sweepFromFileName string) error {
 	defer sweepFromFile.Close()
 
 	if err != nil {
-		fmt.Fprintf(ErrWriter, "Unable to open file to sweep from: %v\n", err)
+		fmt.Fprintf(ErrWriter, "Unable to open file to sweep from '%v' - '%v'\n", sweepFromFileName, err)
 		return err
 	}
 
@@ -153,7 +153,7 @@ func sweepFrom(sweepFromFileName string) error {
 		directoryToSweep := input.Text()
 		err := sweepDirectory(directoryToSweep)
 		if err != nil {
-			fmt.Fprintf(ErrWriter, "Unable to sweep from: '%v' - '%v'\n", directoryToSweep, err)
+			fmt.Fprintf(ErrWriter, "Unable to sweep from '%v' - '%v'\n", directoryToSweep, err)
 			continue
 		}
 	}
@@ -164,8 +164,8 @@ func sweepFrom(sweepFromFileName string) error {
 func sweepDirectory(directoryToSweep string) error {
 	var absDirectoryToSweep, err = filepath.Abs(directoryToSweep)
 	if err != nil {
-		fmt.Fprintf(ErrWriter, "Unable to find the absolute path for '%v'!\n",
-			directoryToSweep)
+		fmt.Fprintf(ErrWriter, "Unable to find the absolute path for '%v' - '%v'!\n",
+			directoryToSweep, err)
 		return err
 	}
 
@@ -193,7 +193,7 @@ func sweepDirectory(directoryToSweep string) error {
 
 			// Remove emptied sd folders
 			if len(sdFiles) == 0 {
-				fmt.Fprintf(OutWriter, "Deleting empty SD folder '%s'\n", sdFolder)
+				fmt.Fprintf(OutWriter, "Adding empty SD folder '%s' to the delete list\n", sdFolder)
 				filesToDelete = append(filesToDelete, sdFolder)
 			}
 
@@ -205,7 +205,7 @@ func sweepDirectory(directoryToSweep string) error {
 				}
 
 				if sdStat.ModTime().Before(sdExpiryCutoff) {
-					fmt.Fprintf(OutWriter, "Deleting old SD file '%v' (%s)\n",
+					fmt.Fprintf(OutWriter, "Adding old SD file '%v' (%s) to the delete list\n",
 						sdFile,
 						sdStat.ModTime().Format("2006-01-02 15:04:05"))
 					filesToDelete = append(filesToDelete, sdFile)
@@ -224,7 +224,7 @@ func sweepDirectory(directoryToSweep string) error {
 						fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
 						continue
 					}
-					fmt.Fprintf(OutWriter, "Deleting '%v'\n", actionForFile.file)
+					fmt.Fprintf(OutWriter, "Adding '%v' to the delete list\n", actionForFile.file)
 					filesToDelete = append(filesToDelete, actionForFile.file)
 				} else if actionForFile.action == "keep" {
 					fmt.Fprintf(OutWriter, "Keeping '%v'\n", actionForFile.file)
@@ -245,7 +245,7 @@ func sweepDirectory(directoryToSweep string) error {
 	}
 
 	for _, fileToDelete := range filesToDelete {
-		fmt.Fprintf(OutWriter, "Deleting: '%v'\n", fileToDelete)
+		fmt.Fprintf(OutWriter, "Deleting '%v'\n", fileToDelete)
 		os.RemoveAll(fileToDelete)
 	}
 
