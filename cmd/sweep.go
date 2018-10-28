@@ -17,7 +17,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/robert-impey/staydeleted/staydeleted"
+	"github.com/robert-impey/staydeleted/sdlib"
 	"github.com/spf13/cobra"
 	"io"
 	"math/rand"
@@ -180,7 +180,7 @@ func sweepDirectory(directoryToSweep string) error {
 			return err
 		}
 
-		if info.IsDir() && info.Name() == staydeleted.SdFolderName {
+		if info.IsDir() && info.Name() == sdlib.SdFolderName {
 			sdFolder := path
 			fmt.Fprintf(OutWriter, "Search SD folder '%v'\n", sdFolder)
 			containingFolder := filepath.Dir(sdFolder)

@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/robert-impey/staydeleted/staydeleted"
+	"github.com/robert-impey/staydeleted/sdlib"
 	"github.com/spf13/cobra"
 )
 
@@ -98,7 +98,7 @@ func setActionForFile(fileName string, action string) error {
 }
 
 func getSdFile(file string) (string, error) {
-	sdFolder, err := staydeleted.GetSdFolder(file)
+	sdFolder, err := sdlib.GetSdFolder(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get sd folder for '%v'!", file)
 		return "", err
