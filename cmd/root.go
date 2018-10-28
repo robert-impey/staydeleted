@@ -23,8 +23,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const sdFolderName = ".stay-deleted"
-
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands

@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/robert-impey/staydeleted/staydeleted"
 	"github.com/spf13/cobra"
 )
 
@@ -96,21 +97,8 @@ func setActionForFile(fileName string, action string) error {
 	return nil
 }
 
-func getSdFolder(file string) (string, error) {
-	dir := filepath.Dir(file)
-	attemptedAbsSdFolder := filepath.Join(dir, sdFolderName)
-	absSdFolder, err := filepath.Abs(attemptedAbsSdFolder)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to find the absolute path of '%v'!",
-			attemptedAbsSdFolder)
-		return "", err
-	} else {
-		return absSdFolder, nil
-	}
-}
-
 func getSdFile(file string) (string, error) {
-	sdFolder, err := getSdFolder(file)
+	sdFolder, err := staydeleted.GetSdFolder(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get sd folder for '%v'!", file)
 		return "", err
