@@ -102,9 +102,9 @@ func getSdFile(file string) (string, error) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get sd folder for '%v'!", file)
 		return "", err
-	} else {
-		fileBase := filepath.Base(file)
-		data := []byte(fileBase)
-		return fmt.Sprintf("%v/%x.txt", sdFolder, md5.Sum(data)), nil
 	}
+
+	fileBase := filepath.Base(file)
+	data := []byte(fileBase)
+	return fmt.Sprintf("%v/%x.txt", sdFolder, md5.Sum(data)), nil
 }

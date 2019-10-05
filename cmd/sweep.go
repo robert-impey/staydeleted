@@ -17,13 +17,14 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/robert-impey/staydeleted/sdlib"
-	"github.com/spf13/cobra"
 	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/robert-impey/staydeleted/sdlib"
+	"github.com/spf13/cobra"
 )
 
 type ActionForFile struct {
