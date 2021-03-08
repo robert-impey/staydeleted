@@ -248,7 +248,10 @@ func sweepDirectory(directoryToSweep string) error {
 
 	for _, fileToDelete := range filesToDelete {
 		fmt.Fprintf(OutWriter, "Deleting '%v'\n", fileToDelete)
-		os.RemoveAll(fileToDelete)
+		err = os.RemoveAll(fileToDelete)
+		if err != nil {
+			fmt.Fprintf(ErrWriter, "%v\n", err)
+		}
 	}
 
 	return nil
