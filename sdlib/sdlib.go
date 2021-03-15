@@ -1,6 +1,7 @@
 package sdlib
 
 import (
+	"crypto/md5"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -19,4 +20,16 @@ func GetSdFolder(file string) (string, error) {
 	} else {
 		return absSdFolder, nil
 	}
+}
+
+func GetSdFile(file string) (string, error) {
+	sdFolder, err := GetSdFolder(file)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to get sd folder for '%v'!", file)
+		return "", err
+	}
+
+	fileBase := filepath.Base(file)
+	data := []byte(fileBase)
+	return fmt.Sprintf("%v/%x.txt", sdFolder, md5.Sum(data)), nil
 }

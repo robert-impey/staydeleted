@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"crypto/md5"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -67,7 +66,7 @@ func setActionForFile(fileName string, action string) error {
 
 	fmt.Printf("Marking: '%v'!\n", absFileName)
 	fileBase := filepath.Base(absFileName)
-	sdFileName, err := getSdFile(absFileName)
+	sdFileName, err := sdlib.GetSdFile(absFileName)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get sd file name for '%v'!",
@@ -95,16 +94,4 @@ func setActionForFile(fileName string, action string) error {
 	fmt.Fprintf(sdFile, "%v\n%v\n", fileBase, action)
 
 	return nil
-}
-
-func getSdFile(file string) (string, error) {
-	sdFolder, err := sdlib.GetSdFolder(file)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to get sd folder for '%v'!", file)
-		return "", err
-	}
-
-	fileBase := filepath.Base(file)
-	data := []byte(fileBase)
-	return fmt.Sprintf("%v/%x.txt", sdFolder, md5.Sum(data)), nil
 }
