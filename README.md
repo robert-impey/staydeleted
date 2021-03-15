@@ -1,6 +1,6 @@
 # staydeleted
 
-[![Build Status](https://travis-ci.org/robert-impey/staydeleted.svg?branch=master)](https://travis-ci.org/robert-impey/staydeleted)
+[![Build Status](https://travis-ci.com/robert-impey/stay-deleted.svg?branch=master&status=unknown)](https://travis-ci.com/github/robert-impey/stay-deleted)
 
 To make sure that files stay deleted.
 
