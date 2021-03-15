@@ -1,7 +1,5 @@
 # staydeleted
 
-[![Build Status](https://travis-ci.com/robert-impey/stay-deleted.svg?branch=master&status=unknown)](https://travis-ci.com/github/robert-impey/stay-deleted)
-
 To make sure that files stay deleted.
 
 This is useful for folders that are synched in both directions with backup disks on a regular schedule.
