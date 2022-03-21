@@ -36,6 +36,7 @@ var Period int32
 var LogsDir string
 
 var ExpiryMonths int
+var Verbose bool
 
 var OutWriter io.Writer
 var ErrWriter io.Writer
@@ -62,6 +63,7 @@ func init() {
 		"The logs directory for repeated runs.")
 	sweepCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
 		"The number of months before SD files expire.")
+	sweepCmd.Flags().BoolVarP(&Verbose, "verbose", "v", false, "Print verbosely.")
 }
 
 func sweep(paths []string) {
@@ -173,7 +175,9 @@ func sweepDirectory(directoryToSweep string) error {
 
 	sdExpiryCutoff := time.Now().AddDate(0, -1*ExpiryMonths, 0)
 
-	fmt.Fprintf(OutWriter, "Sweeping: '%v'\n", absDirectoryToSweep)
+	if Verbose {
+		fmt.Fprintf(OutWriter, "Sweeping: '%v'\n", absDirectoryToSweep)
+	}
 	filesToDelete := make([]string, 0)
 	walker := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -183,9 +187,13 @@ func sweepDirectory(directoryToSweep string) error {
 
 		if info.IsDir() && info.Name() == sdlib.SdFolderName {
 			sdFolder := path
-			fmt.Fprintf(OutWriter, "Search SD folder '%v'\n", sdFolder)
+			if Verbose {
+				fmt.Fprintf(OutWriter, "Search SD folder '%v'\n", sdFolder)
+			}
 			containingFolder := filepath.Dir(sdFolder)
-			fmt.Fprintf(OutWriter, "Containing folder '%v'\n", containingFolder)
+			if Verbose {
+				fmt.Fprintf(OutWriter, "Containing folder '%v'\n", containingFolder)
+			}
 
 			sdFiles, err := filepath.Glob(filepath.Join(sdFolder, "*.txt"))
 			if err != nil {
@@ -214,7 +222,9 @@ func sweepDirectory(directoryToSweep string) error {
 					continue
 				}
 
-				fmt.Fprintf(OutWriter, "SD File '%v'\n", sdFile)
+				if Verbose {
+					fmt.Fprintf(OutWriter, "SD File '%v'\n", sdFile)
+				}
 				actionForFile, err := getActionForFile(sdFile, containingFolder)
 				if err != nil {
 					fmt.Fprintf(ErrWriter, "%v\n", err)
@@ -223,13 +233,17 @@ func sweepDirectory(directoryToSweep string) error {
 
 				if actionForFile.action == "delete" {
 					if _, err := os.Stat(actionForFile.file); os.IsNotExist(err) {
-						fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
+						if Verbose {
+							fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
+						}
 						continue
 					}
 					fmt.Fprintf(OutWriter, "Adding '%v' to the delete list\n", actionForFile.file)
 					filesToDelete = append(filesToDelete, actionForFile.file)
 				} else if actionForFile.action == "keep" {
-					fmt.Fprintf(OutWriter, "Keeping '%v'\n", actionForFile.file)
+					if Verbose {
+						fmt.Fprintf(OutWriter, "Keeping '%v'\n", actionForFile.file)
+					}
 				} else {
 					fmt.Fprintf(ErrWriter, "Unrecognised action '%v' from '%v'!\n",
 						actionForFile.action, sdFile)
