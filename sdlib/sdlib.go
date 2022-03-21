@@ -31,5 +31,5 @@ func GetSdFile(file string) (string, error) {
 
 	fileBase := filepath.Base(file)
 	data := []byte(fileBase)
-	return fmt.Sprintf("%v/%x.txt", sdFolder, md5.Sum(data)), nil
+	return filepath.Join(sdFolder, fmt.Sprintf("%x.txt", md5.Sum(data))), nil
 }
