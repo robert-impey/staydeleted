@@ -108,8 +108,10 @@ func sweep(paths []string) {
 		for i := 0; i < NumRepeats; i++ {
 			firstWait := rand.Int31n(Period)
 			time.Sleep(time.Duration(firstWait) * time.Second)
-			fmt.Fprintf(OutWriter, "Run: %d at %s\n", i,
-				time.Now().Format("2006-01-02 15:04:05"))
+			if Verbose {
+				fmt.Fprintf(OutWriter, "Run: %d at %s\n", i,
+					time.Now().Format("2006-01-02 15:04:05"))
+			}
 			sweepPaths(paths)
 			secondWait := Period - firstWait
 			time.Sleep(time.Duration(secondWait) * time.Second)
