@@ -223,7 +223,7 @@ func sweepDirectory(directoryToSweep string) error {
 				if Verbose {
 					fmt.Fprintf(OutWriter, "SD File '%v'\n", sdFile)
 				}
-				actionForFile, err := getActionForFile(sdFile, containingFolder)
+				actionForFile, err := sdlib.GetActionForFile(sdFile, containingFolder, ErrWriter)
 				if err != nil {
 					fmt.Fprintf(ErrWriter, "%v\n", err)
 					return err
@@ -267,22 +267,4 @@ func sweepDirectory(directoryToSweep string) error {
 	}
 
 	return nil
-}
-
-func getActionForFile(sdFileName, containingFolder string) (sdlib.ActionForFile, error) {
-	sdFile, err := os.Open(sdFileName)
-	defer sdFile.Close()
-
-	if err != nil {
-		fmt.Fprintf(ErrWriter, "%v\n", err)
-		return sdlib.ActionForFile{"", ""}, err
-	}
-
-	input := bufio.NewScanner(sdFile)
-	input.Scan()
-	fileToProcessName := filepath.Join(containingFolder, input.Text())
-	input.Scan()
-	action := input.Text()
-
-	return sdlib.ActionForFile{fileToProcessName, action}, nil
 }

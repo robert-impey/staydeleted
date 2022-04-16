@@ -1,8 +1,10 @@
 package sdlib
 
 import (
+	"bufio"
 	"crypto/md5"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -36,4 +38,22 @@ func GetSdFile(file string) (string, error) {
 	fileBase := filepath.Base(file)
 	data := []byte(fileBase)
 	return filepath.Join(sdFolder, fmt.Sprintf("%x.txt", md5.Sum(data))), nil
+}
+
+func GetActionForFile(sdFileName, containingFolder string, errWriter io.Writer) (ActionForFile, error) {
+	sdFile, err := os.Open(sdFileName)
+	defer sdFile.Close()
+
+	if err != nil {
+		fmt.Fprintf(errWriter, "%v\n", err)
+		return ActionForFile{"", ""}, err
+	}
+
+	input := bufio.NewScanner(sdFile)
+	input.Scan()
+	fileToProcessName := filepath.Join(containingFolder, input.Text())
+	input.Scan()
+	action := input.Text()
+
+	return ActionForFile{fileToProcessName, action}, nil
 }
