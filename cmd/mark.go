@@ -15,10 +15,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/robert-impey/staydeleted/sdlib"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +34,7 @@ taken care of by the sweep command.`,
 		}
 
 		for _, arg := range args {
-			setActionForFile(arg, action)
+			sdlib.SetActionForFile(arg, action)
 		}
 	},
 }
@@ -55,43 +51,4 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	markCmd.Flags().BoolVarP(&Keep, "keep", "k", false, "Keep this file.")
-}
-
-func setActionForFile(fileName string, action string) error {
-	var absFileName, err = filepath.Abs(fileName)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to find the absolute path for '%v'!\n", fileName)
-		return err
-	}
-
-	fmt.Printf("Marking: '%v'!\n", absFileName)
-	fileBase := filepath.Base(absFileName)
-	sdFileName, err := sdlib.GetSdFile(absFileName)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to get sd file name for '%v'!",
-			absFileName)
-		return err
-	}
-
-	fmt.Printf("SD File: '%v'!\n", sdFileName)
-	sdFolder := filepath.Dir(sdFileName)
-
-	if _, err := os.Stat(sdFolder); os.IsNotExist(err) {
-		fmt.Printf("Making directory '%v'\n", sdFolder)
-		os.Mkdir(sdFolder, 0755)
-	}
-
-	sdFile, err := os.Create(sdFileName)
-	defer sdFile.Close()
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Couldn't create file '%v'!\n",
-			sdFileName)
-		return err
-	}
-
-	fmt.Fprintf(sdFile, "%v\n%v\n", fileBase, action)
-
-	return nil
 }
