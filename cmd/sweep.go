@@ -27,10 +27,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ActionForFile struct {
-	file, action string
-}
-
 var NumRepeats int
 var Period int32
 var LogsDir string
@@ -233,22 +229,22 @@ func sweepDirectory(directoryToSweep string) error {
 					return err
 				}
 
-				if actionForFile.action == "delete" {
-					if _, err := os.Stat(actionForFile.file); os.IsNotExist(err) {
+				if actionForFile.Action == "delete" {
+					if _, err := os.Stat(actionForFile.File); os.IsNotExist(err) {
 						if Verbose {
-							fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.file)
+							fmt.Fprintf(OutWriter, "'%v' already deleted.\n", actionForFile.File)
 						}
 						continue
 					}
-					fmt.Fprintf(OutWriter, "Adding '%v' to the delete list\n", actionForFile.file)
-					filesToDelete = append(filesToDelete, actionForFile.file)
-				} else if actionForFile.action == "keep" {
+					fmt.Fprintf(OutWriter, "Adding '%v' to the delete list\n", actionForFile.File)
+					filesToDelete = append(filesToDelete, actionForFile.File)
+				} else if actionForFile.Action == "keep" {
 					if Verbose {
-						fmt.Fprintf(OutWriter, "Keeping '%v'\n", actionForFile.file)
+						fmt.Fprintf(OutWriter, "Keeping '%v'\n", actionForFile.File)
 					}
 				} else {
 					fmt.Fprintf(ErrWriter, "Unrecognised action '%v' from '%v'!\n",
-						actionForFile.action, sdFile)
+						actionForFile.Action, sdFile)
 				}
 			}
 		}
@@ -273,13 +269,13 @@ func sweepDirectory(directoryToSweep string) error {
 	return nil
 }
 
-func getActionForFile(sdFileName, containingFolder string) (ActionForFile, error) {
+func getActionForFile(sdFileName, containingFolder string) (sdlib.ActionForFile, error) {
 	sdFile, err := os.Open(sdFileName)
 	defer sdFile.Close()
 
 	if err != nil {
 		fmt.Fprintf(ErrWriter, "%v\n", err)
-		return ActionForFile{"", ""}, err
+		return sdlib.ActionForFile{"", ""}, err
 	}
 
 	input := bufio.NewScanner(sdFile)
@@ -288,5 +284,5 @@ func getActionForFile(sdFileName, containingFolder string) (ActionForFile, error
 	input.Scan()
 	action := input.Text()
 
-	return ActionForFile{fileToProcessName, action}, nil
+	return sdlib.ActionForFile{fileToProcessName, action}, nil
 }

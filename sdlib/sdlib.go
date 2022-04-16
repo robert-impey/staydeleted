@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 )
 
+type ActionForFile struct {
+	File, Action string
+}
+
 const SdFolderName = ".stay-deleted"
 
 func GetSdFolder(file string) (string, error) {
