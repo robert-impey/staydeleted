@@ -213,7 +213,7 @@ func sweepDirectory(directoryToSweep string) error {
 				}
 
 				if sdStat.ModTime().Before(sdExpiryCutoff) {
-					fmt.Fprintf(OutWriter, "Adding old SD file '%v' (%s) to the delete list\n",
+					fmt.Fprintf(OutWriter, "Adding old SD file '%v' from %s to the delete list\n",
 						sdFile,
 						sdStat.ModTime().Format("2006-01-02 15:04:05"))
 					filesToDelete = append(filesToDelete, sdFile)
@@ -245,6 +245,10 @@ func sweepDirectory(directoryToSweep string) error {
 				} else {
 					fmt.Fprintf(ErrWriter, "Unrecognised action '%v' from '%v'!\n",
 						actionForFile.Action, sdFile)
+					fmt.Fprintf(OutWriter, "Adding unreadable SD file '%v' from %s to the delete list\n",
+						sdFile,
+						sdStat.ModTime().Format("2006-01-02 15:04:05"))
+					filesToDelete = append(filesToDelete, sdFile)
 				}
 			}
 		}
