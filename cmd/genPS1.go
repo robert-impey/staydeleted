@@ -22,13 +22,11 @@ import (
 // genPS1Cmd represents the genPS1 command
 var genPS1Cmd = &cobra.Command{
 	Use:   "genPS1",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Generate PS1 Files",
+	Long: `Generate a PowerShell script that wraps the command.
+One script is generated for each directory in the input file
+that is used for sweeping.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		genScripts(args)
 	},
