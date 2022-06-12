@@ -21,6 +21,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/robert-impey/staydeleted/sdlib"
@@ -153,10 +154,12 @@ func sweepFrom(sweepFromFileName string) error {
 	input := bufio.NewScanner(sweepFromFile)
 	for input.Scan() {
 		directoryToSweep := input.Text()
-		err := sweepDirectory(directoryToSweep)
-		if err != nil {
-			fmt.Fprintf(ErrWriter, "Unable to sweep from '%v' - '%v'\n", directoryToSweep, err)
-			continue
+		if len(strings.TrimSpace(directoryToSweep)) > 0 && !strings.HasPrefix(directoryToSweep, "#") {
+			err := sweepDirectory(directoryToSweep)
+			if err != nil {
+				fmt.Fprintf(ErrWriter, "Unable to sweep from '%v' - '%v'\n", directoryToSweep, err)
+				continue
+			}
 		}
 	}
 
