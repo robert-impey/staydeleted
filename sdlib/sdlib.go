@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ActionForFile struct {
@@ -95,4 +96,30 @@ func SetActionForFile(fileName string, action string) error {
 	fmt.Fprintf(sdFile, "%v\n%v\n", fileBase, action)
 
 	return nil
+}
+
+func ReadSweepFromFile(sweepFromFileName string) ([]string, error) {
+	sweepFromFile, err := os.Open(sweepFromFileName)
+
+	if err != nil {
+		return nil, err
+	}
+	defer sweepFromFile.Close()
+
+	directoriesToSweep := make([]string, 0)
+
+	input := bufio.NewScanner(sweepFromFile)
+	for input.Scan() {
+		directoryToSweep := input.Text()
+		if len(strings.TrimSpace(directoryToSweep)) == 0 {
+			continue
+		}
+		if strings.HasPrefix(directoryToSweep, "#") {
+			continue
+		}
+
+		directoriesToSweep = append(directoriesToSweep, directoryToSweep)
+	}
+
+	return directoriesToSweep, nil
 }

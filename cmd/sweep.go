@@ -15,13 +15,11 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/robert-impey/staydeleted/sdlib"
@@ -143,23 +141,18 @@ func sweepPaths(paths []string) {
 }
 
 func sweepFrom(sweepFromFileName string) error {
-	sweepFromFile, err := os.Open(sweepFromFileName)
-	defer sweepFromFile.Close()
-
+	var directoriesToSweepFrom, err = sdlib.ReadSweepFromFile(sweepFromFileName)
 	if err != nil {
-		fmt.Fprintf(ErrWriter, "Unable to open file to sweep from '%v' - '%v'\n", sweepFromFileName, err)
-		return err
+		_, err := fmt.Fprintf(ErrWriter, "Unable to read file to sweep from '%v' - '%v'\n", sweepFromFileName, err)
+		if err != nil {
+			return err
+		}
 	}
 
-	input := bufio.NewScanner(sweepFromFile)
-	for input.Scan() {
-		directoryToSweep := input.Text()
-		if len(strings.TrimSpace(directoryToSweep)) > 0 && !strings.HasPrefix(directoryToSweep, "#") {
-			err := sweepDirectory(directoryToSweep)
-			if err != nil {
-				fmt.Fprintf(ErrWriter, "Unable to sweep from '%v' - '%v'\n", directoryToSweep, err)
-				continue
-			}
+	for _, directoryToSweepFrom := range directoriesToSweepFrom {
+		err := sweepDirectory(directoryToSweepFrom)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -261,7 +254,10 @@ func sweepDirectory(directoryToSweep string) error {
 
 	err = filepath.Walk(absDirectoryToSweep, walker)
 	if err != nil {
-		fmt.Fprintf(ErrWriter, "%v\n", err)
+		_, err := fmt.Fprintf(ErrWriter, "%v\n", err)
+		if err != nil {
+			return err
+		}
 		return err
 	}
 
