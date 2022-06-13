@@ -108,8 +108,11 @@ func sweep(paths []string) {
 					time.Now().Format("2006-01-02 15:04:05"))
 			}
 			sweepPaths(paths)
-			secondWait := Period - firstWait
-			time.Sleep(time.Duration(secondWait) * time.Second)
+
+			if i < NumRepeats-1 {
+				secondWait := Period - firstWait
+				time.Sleep(time.Duration(secondWait) * time.Second)
+			}
 		}
 	}
 }
