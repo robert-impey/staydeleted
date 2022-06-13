@@ -54,7 +54,7 @@ func init() {
 		"The number of times to repeat the sweeping.")
 	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600,
 		"The number of seconds in the waiting period. A random time during the period is chosen.")
-	sweepCmd.Flags().StringVarP(&LogsDir, "logs", "l", "logs",
+	sweepCmd.Flags().StringVarP(&LogsDir, "logs", "l", "",
 		"The logs directory for repeated runs.")
 	sweepCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
 		"The number of months before SD files expire.")
@@ -62,12 +62,7 @@ func init() {
 }
 
 func sweep(paths []string) {
-	if NumRepeats < 1 {
-		OutWriter = os.Stdout
-		ErrWriter = os.Stderr
-
-		sweepPaths(paths)
-	} else {
+	if len(LogsDir) > 0 {
 		rootLogFolder, err := filepath.Abs(LogsDir)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -99,7 +94,14 @@ func sweep(paths []string) {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
 		ErrWriter = errLogFile
+	} else {
+		OutWriter = os.Stdout
+		ErrWriter = os.Stderr
+	}
 
+	if NumRepeats < 1 {
+		sweepPaths(paths)
+	} else {
 		for i := 0; i < NumRepeats; i++ {
 			firstWait := rand.Int31n(Period)
 			time.Sleep(time.Duration(firstWait) * time.Second)
@@ -107,6 +109,7 @@ func sweep(paths []string) {
 				fmt.Fprintf(OutWriter, "Run: %d at %s\n", i,
 					time.Now().Format("2006-01-02 15:04:05"))
 			}
+
 			sweepPaths(paths)
 
 			if i < NumRepeats-1 {
