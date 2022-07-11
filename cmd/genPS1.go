@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/robert-impey/staydeleted/sdlib"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -90,19 +89,6 @@ func genScript(dir string, autoGenDir string) {
 		autoGenDir,
 	)
 
-	scriptContents := "# AUTOGEN'D - DO NOT EDIT!\n\n"
-
-	printDate := "date\n\n"
-
-	scriptContents += printDate
-
-	scriptContents += "staydeleted.exe sweep "
-
-	scriptContents += dir
-	scriptContents += "\n\n"
-
-	scriptContents += printDate
-
 	scriptFileName := strings.ReplaceAll(dir, ":\\", "_")
 	scriptFileName = strings.ReplaceAll(scriptFileName, "\\", "_")
 	scriptFileName = strings.ReplaceAll(scriptFileName, "/", "_")
@@ -112,7 +98,25 @@ func genScript(dir string, autoGenDir string) {
 
 	scriptFilePath := filepath.Join(autoGenDir, scriptFileName)
 
-	err := ioutil.WriteFile(scriptFilePath, []byte(scriptContents), 0x755)
+	f, err := os.OpenFile(scriptFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
+	}
+	defer f.Close()
+
+	f.WriteString("# AUTOGEN'D - DO NOT EDIT!\n\n")
+
+	printDate := "date\n\n"
+
+	f.WriteString(printDate)
+
+	f.WriteString("staydeleted.exe sweep -v ")
+
+	f.WriteString(dir)
+	f.WriteString("\n\n")
+
+	f.WriteString(printDate)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to write script to %v - %v\n", scriptFilePath, err)
 	}
