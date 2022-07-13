@@ -11,7 +11,7 @@ import (
 )
 
 type ActionForFile struct {
-	File, Action string
+	SdFile, File, Action string
 }
 
 const SdFolderName = ".stay-deleted"
@@ -47,7 +47,7 @@ func GetActionForFile(sdFileName, containingFolder string, errWriter io.Writer) 
 
 	if err != nil {
 		fmt.Fprintf(errWriter, "%v\n", err)
-		return ActionForFile{"", ""}, err
+		return ActionForFile{"", "", ""}, err
 	}
 
 	input := bufio.NewScanner(sdFile)
@@ -56,7 +56,7 @@ func GetActionForFile(sdFileName, containingFolder string, errWriter io.Writer) 
 	input.Scan()
 	action := input.Text()
 
-	return ActionForFile{fileToProcessName, action}, nil
+	return ActionForFile{sdFileName, fileToProcessName, action}, nil
 }
 
 func SetActionForFile(fileName string, action string) error {
