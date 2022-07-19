@@ -274,7 +274,13 @@ func sweepDirectory(directoryToSweep string) error {
 
 	var pe *fs.PathError
 	for _, fileToDelete := range filesToDelete {
-		fmt.Fprintf(OutWriter, "Deleting '%v'\n", fileToDelete)
+		var deleteMessage = fmt.Sprintf("Deleting '%v'", fileToDelete.Path)
+
+		if len(fileToDelete.SDFile) > 0 {
+			deleteMessage += fmt.Sprintf(" as instructed by '%v'", fileToDelete.SDFile)
+		}
+		fmt.Fprintf(OutWriter, "%v\n", deleteMessage)
+
 		err = os.RemoveAll(fileToDelete.Path)
 		if err != nil {
 			fmt.Fprintf(ErrWriter, "%v\n", err)
