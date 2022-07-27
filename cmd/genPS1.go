@@ -8,12 +8,13 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/robert-impey/staydeleted/sdlib"
 	"os"
 	"os/user"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/robert-impey/staydeleted/sdlib"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/spf13/cobra"
