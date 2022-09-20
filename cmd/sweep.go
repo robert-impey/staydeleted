@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/robert-impey/staydeleted/sdlib"
@@ -180,6 +181,7 @@ func sweepDirectory(directoryToSweep string) error {
 
 	sdExpiryCutoff := time.Now().AddDate(0, -1*ExpiryMonths, 0)
 
+	re, _ := regexp.Compile(`[0-9a-fA-F]+.txt`)
 	if Verbose {
 		fmt.Fprintf(OutWriter, "Sweeping: '%v'\n", absDirectoryToSweep)
 	}
@@ -217,6 +219,13 @@ func sweepDirectory(directoryToSweep string) error {
 				if err != nil {
 					fmt.Fprintf(ErrWriter, "%v\n", err)
 					return err
+				}
+
+				if !re.Match([]byte(sdStat.Name())) {
+					fmt.Fprintf(OutWriter, "'%v' is not a legal name for SD file - deleting.\n",
+						sdFile)
+					filesToDelete = append(filesToDelete, fileToDelete{sdFile, ""})
+					continue
 				}
 
 				if sdStat.ModTime().Before(sdExpiryCutoff) {
