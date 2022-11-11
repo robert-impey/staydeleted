@@ -58,7 +58,7 @@ func init() {
 	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600,
 		"The number of seconds in the waiting period. A random time during the period is chosen.")
 	sweepCmd.Flags().StringVarP(&LogsDir, "logs", "l", "",
-		"The logs directory for repeated runs.")
+		"The logs directory.")
 	sweepCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
 		"The number of months before SD files expire.")
 	sweepCmd.Flags().BoolVarP(&Verbose, "verbose", "v", false, "Print verbosely.")
