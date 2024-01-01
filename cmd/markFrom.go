@@ -1,7 +1,8 @@
+package cmd
+
 /*
 Copyright © 2022 Robert Impey robert.impey@hotmail.co.uk
 */
-package cmd
 
 import (
 	"bufio"
