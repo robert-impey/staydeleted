@@ -274,11 +274,8 @@ func SweepDirectory(directoryToSweep string, expiryMonths int, outWriter io.Writ
 		if err != nil {
 			fmt.Fprintf(errWriter, "%v\n", err)
 			if errors.As(err, &pe) {
-				fmt.Fprintf(errWriter,
-					"Failed to remove %v from %v - Removing the SD file\n",
-					pe.Path, fileToDelete.SDFile)
+				fmt.Fprintf(errWriter, "Failed to remove %v from %v\n", pe.Path, fileToDelete.SDFile)
 
-				err = os.RemoveAll(fileToDelete.SDFile)
 				if err != nil {
 					fmt.Fprintf(errWriter, "%v\n", err)
 				}
