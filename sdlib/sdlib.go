@@ -14,11 +14,45 @@ import (
 	"time"
 )
 
+type Action int
+
+const (
+	NoAction Action = iota
+	Delete
+	Keep
+)
+
 type ActionForFile struct {
-	SdFile, File, Action string
+	SdFile, File string
+	Action       Action
 }
 
 const SdFolderName = ".stay-deleted"
+
+func GetActionForBool(keep bool) Action {
+	if keep {
+		return Keep
+	}
+	return Delete
+}
+
+func getStringForAction(action Action) string {
+	if action == Keep {
+		return "keep"
+	}
+
+	return "delete"
+}
+
+func getActionForString(actStr string) (Action, error) {
+	if actStr == "delete" {
+		return Delete, nil
+	} else if actStr == "keep" {
+		return Keep, nil
+	}
+
+	return NoAction, fmt.Errorf("unable to convert %s to an action", actStr)
+}
 
 func GetSdFolder(file string) (string, error) {
 	dir := filepath.Dir(file)
@@ -51,19 +85,23 @@ func GetActionForFile(sdFileName, containingFolder string, errWriter io.Writer) 
 
 	if err != nil {
 		fmt.Fprintf(errWriter, "%v\n", err)
-		return ActionForFile{"", "", ""}, err
+		return ActionForFile{"", "", NoAction}, err
 	}
 
 	input := bufio.NewScanner(sdFile)
 	input.Scan()
 	fileToProcessName := filepath.Join(containingFolder, input.Text())
 	input.Scan()
-	action := input.Text()
+	action, err := getActionForString(input.Text())
+	if err != nil {
+		fmt.Fprintf(errWriter, "%v\n", err)
+		return ActionForFile{"", "", NoAction}, err
+	}
 
 	return ActionForFile{sdFileName, fileToProcessName, action}, nil
 }
 
-func SetActionForFile(fileName string, action string) error {
+func SetActionForFile(fileName string, action Action) error {
 	var absFileName, err = filepath.Abs(fileName)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to find the absolute path for '%v'!\n", fileName)
@@ -97,7 +135,7 @@ func SetActionForFile(fileName string, action string) error {
 		return err
 	}
 
-	fmt.Fprintf(sdFile, "%v\n%v\n", fileBase, action)
+	fmt.Fprintf(sdFile, "%v\n%s\n", fileBase, getStringForAction(action))
 
 	return nil
 }
@@ -225,7 +263,7 @@ func SweepDirectory(directoryToSweep string, expiryMonths int, outWriter io.Writ
 					return err
 				}
 
-				if actionForFile.Action == "delete" {
+				if actionForFile.Action == Delete {
 					if _, err := os.Stat(actionForFile.File); os.IsNotExist(err) {
 						if verbose {
 							fmt.Fprintf(outWriter, "'%v' already deleted.\n", actionForFile.File)
@@ -234,7 +272,7 @@ func SweepDirectory(directoryToSweep string, expiryMonths int, outWriter io.Writ
 					}
 					fmt.Fprintf(outWriter, "Adding '%v' to the delete list\n", actionForFile.File)
 					filesToDelete = append(filesToDelete, fileToDelete{actionForFile.File, actionForFile.SdFile})
-				} else if actionForFile.Action == "keep" {
+				} else if actionForFile.Action == Keep {
 					if verbose {
 						fmt.Fprintf(outWriter, "Keeping '%v'\n", actionForFile.File)
 					}

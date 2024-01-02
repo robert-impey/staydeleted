@@ -17,13 +17,8 @@ import (
 // markFromCmd represents the markFrom command
 var markFromCmd = &cobra.Command{
 	Use:   "markFrom",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Mark all the files in a text file for deletion",
+	Long:  `If many files need to be marked for deletion, a text file can be provided.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, arg := range args {
 			err := markFrom(arg)
@@ -65,7 +60,7 @@ func markFrom(markFromFileName string) error {
 		filesToMark = append(filesToMark, fileToMark)
 	}
 
-	action := "delete"
+	action := sdlib.Delete
 
 	for _, fileToMark := range filesToMark {
 		err := sdlib.SetActionForFile(fileToMark, action)

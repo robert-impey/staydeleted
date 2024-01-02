@@ -34,7 +34,7 @@ func TestSetGetAction(t *testing.T) {
 	tf, _ := os.Create(tfp)
 	defer tf.Close()
 
-	action := "keep"
+	action := Keep
 	err := SetActionForFile(tfp, action)
 	if err != nil {
 		t.Error(err)
@@ -55,6 +55,6 @@ func TestSetGetAction(t *testing.T) {
 	}
 
 	if gotAction.Action != action {
-		t.Error(fmt.Sprintf("gotAction.Action: %s!", gotAction.Action))
+		t.Error(fmt.Sprintf("gotAction.Action: %s!", getStringForAction(gotAction.Action)))
 	}
 }

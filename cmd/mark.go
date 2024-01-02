@@ -15,8 +15,10 @@ package cmd
 // limitations under the License.
 
 import (
+	"fmt"
 	"github.com/robert-impey/staydeleted/sdlib"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var Keep bool
@@ -28,13 +30,14 @@ var markCmd = &cobra.Command{
 	Long: `Files marked for deletion or keeping will be
 taken care of by the sweep command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		action := "delete"
-		if Keep {
-			action = "keep"
-		}
+		action := sdlib.GetActionForBool(Keep)
 
 		for _, arg := range args {
-			sdlib.SetActionForFile(arg, action)
+			err := sdlib.SetActionForFile(arg, action)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "couldn't set action for file '%s'\n", arg)
+				return
+			}
 		}
 	},
 }
