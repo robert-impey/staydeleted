@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"github.com/robert-impey/staydeleted/sdlib"
 	"io"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,8 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var NumRepeats int
-var Period int32
 var LogsDir string
 
 var ExpiryMonths int
@@ -50,10 +47,6 @@ looking for files that have been marked for deletion.
 
 func init() {
 	rootCmd.AddCommand(sweepCmd)
-	sweepCmd.Flags().IntVarP(&NumRepeats, "repeats", "r", 0,
-		"The number of times to repeat the sweeping.")
-	sweepCmd.Flags().Int32VarP(&Period, "period", "p", 3600,
-		"The number of seconds in the waiting period. A random time during the period is chosen.")
 	sweepCmd.Flags().StringVarP(&LogsDir, "logs", "l", "",
 		"The logs directory.")
 	sweepCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
@@ -99,25 +92,7 @@ func sweep(paths []string) {
 		ErrWriter = os.Stderr
 	}
 
-	if NumRepeats < 1 {
-		sweepPaths(paths)
-	} else {
-		for i := 0; i < NumRepeats; i++ {
-			firstWait := rand.Int31n(Period)
-			time.Sleep(time.Duration(firstWait) * time.Second)
-			if Verbose {
-				fmt.Fprintf(OutWriter, "Run: %d at %s\n", i,
-					time.Now().Format("2006-01-02 15:04:05"))
-			}
-
-			sweepPaths(paths)
-
-			if i < NumRepeats-1 {
-				secondWait := Period - firstWait
-				time.Sleep(time.Duration(secondWait) * time.Second)
-			}
-		}
-	}
+	sweepPaths(paths)
 }
 
 func sweepPaths(paths []string) {
