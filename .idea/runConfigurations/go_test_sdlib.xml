@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go test sdlib" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="staydeleted" />
+    <working_directory value="$PROJECT_DIR$/sdlib" />
+    <root_directory value="$PROJECT_DIR$" />
+    <kind value="PACKAGE" />
+    <package value="github.com/robert-impey/staydeleted/sdlib" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <framework value="gotest" />
+    <method v="2" />
+  </configuration>
+</component>
