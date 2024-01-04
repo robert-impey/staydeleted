@@ -31,3 +31,13 @@ This behaviour relies on the folders being synched with rsync's `--update` optio
 
 Finally, the program cleans up after itself, deleting the special files and their folders after a year.
 This should be enough time for all files marked for deletion to be deleted from all backups.
+
+If you need to mark many files in one go, you can put the paths in a text file
+with one line per path. The tool will mark each file for deletion.
+
+`PS C:\foo>staydeleted markFrom files-to-be-deleted.txt`
+
+Similarly, if you wish to sweep many directories at once, you can provide text file
+with one directory per line.
+
+`PS C:\foo>staydeleted sweepFrom directories-to-sweep.txt`
