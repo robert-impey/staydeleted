@@ -16,7 +16,10 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 
+	"github.com/robert-impey/staydeleted/sdlib"
 	"github.com/spf13/cobra"
 )
 
@@ -28,20 +31,51 @@ var sweepFromCmd = &cobra.Command{
 	one directory per line.
 	Each directory will be swept.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("sweepFrom called")
+		sweepFrom(args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(sweepFromCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// sweepFromCmd.PersistentFlags().String("foo", "", "A help for foo")
+	sweepFromCmd.Flags().StringVarP(&LogsDir, "logs", "l", "",
+		"The logs directory.")
+	sweepFromCmd.Flags().IntVarP(&ExpiryMonths, "expiry", "e", 12,
+		"The number of months before SD files expire.")
+	sweepFromCmd.Flags().BoolVarP(&Verbose, "verbose", "v", false, "Print verbosely.")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// sweepFromCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func sweepFrom(paths []string) {
+	outWriter, errWriter, err := sdlib.GetWriters(LogsDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+	}
+
+	sweepFromPaths(paths, outWriter, errWriter)
+}
+
+func sweepFromPaths(paths []string, outWriter io.Writer, errWriter io.Writer) {
+	for _, path := range paths {
+		stat, err := os.Stat(path)
+		if err != nil {
+			fmt.Fprintf(errWriter, "%v\n", err)
+			continue
+		}
+
+		if stat.IsDir() {
+			fmt.Fprintf(errWriter, "%v\n is a directory!", path)
+		} else {
+			err := sdlib.SweepDirectory(path, ExpiryMonths, outWriter, errWriter, Verbose)
+			if err != nil {
+				fmt.Fprintf(errWriter, "%v\n", err)
+			}
+		}
+		if err != nil {
+			fmt.Fprintf(errWriter, "%v\n", err)
+		}
+	}
 }
