@@ -16,11 +16,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/robert-impey/staydeleted/sdlib"
 	"io"
 	"os"
-	"path/filepath"
-	"time"
+
+	"github.com/robert-impey/staydeleted/sdlib"
 
 	"github.com/spf13/cobra"
 )
@@ -29,9 +28,6 @@ var LogsDir string
 
 var ExpiryMonths int
 var Verbose bool
-
-var OutWriter io.Writer
-var ErrWriter io.Writer
 
 // sweepCmd represents the sweep command
 var sweepCmd = &cobra.Command{
@@ -55,67 +51,35 @@ func init() {
 }
 
 func sweep(paths []string) {
-	if len(LogsDir) > 0 {
-		rootLogFolder, err := filepath.Abs(LogsDir)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-		}
-
-		if _, err := os.Stat(rootLogFolder); os.IsNotExist(err) {
-			fmt.Printf("Making root logs directory '%v'\n", rootLogFolder)
-			os.Mkdir(rootLogFolder, 0755)
-		}
-
-		sdLogFolder := filepath.Join(rootLogFolder, "staydeleted")
-		if _, err := os.Stat(sdLogFolder); os.IsNotExist(err) {
-			fmt.Printf("Making staydeleted logs directory '%v'\n", sdLogFolder)
-			os.Mkdir(sdLogFolder, 0755)
-		}
-
-		timeStr := time.Now().Format("2006-01-02_15.04.05")
-		outLogFileName := filepath.Join(sdLogFolder, fmt.Sprintf("%s.log", timeStr))
-		errLogFileName := filepath.Join(sdLogFolder, fmt.Sprintf("%s.err", timeStr))
-
-		outLogFile, err := os.Create(outLogFileName)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-		}
-		OutWriter = outLogFile
-
-		errLogFile, err := os.Create(errLogFileName)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-		}
-		ErrWriter = errLogFile
-	} else {
-		OutWriter = os.Stdout
-		ErrWriter = os.Stderr
+	outWriter, errWriter, err := sdlib.GetWriters(LogsDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}
 
-	sweepPaths(paths)
+	sweepPaths(paths, outWriter, errWriter)
 }
 
-func sweepPaths(paths []string) {
+func sweepPaths(paths []string, outWriter io.Writer, errWriter io.Writer) {
 	for _, path := range paths {
 		stat, err := os.Stat(path)
 		if err != nil {
-			fmt.Fprintf(ErrWriter, "%v\n", err)
+			fmt.Fprintf(errWriter, "%v\n", err)
 			continue
 		}
 
 		if stat.IsDir() {
-			err := sdlib.SweepDirectory(path, ExpiryMonths, OutWriter, ErrWriter, Verbose)
+			err := sdlib.SweepDirectory(path, ExpiryMonths, outWriter, errWriter, Verbose)
 			if err != nil {
-				fmt.Fprintf(ErrWriter, "%v\n", err)
+				fmt.Fprintf(errWriter, "%v\n", err)
 			}
 		} else {
-			err := sdlib.SweepFrom(path, ExpiryMonths, OutWriter, ErrWriter, Verbose)
+			err := sdlib.SweepFrom(path, ExpiryMonths, outWriter, errWriter, Verbose)
 			if err != nil {
-				fmt.Fprintf(ErrWriter, "%v\n", err)
+				fmt.Fprintf(errWriter, "%v\n", err)
 			}
 		}
 		if err != nil {
-			fmt.Fprintf(ErrWriter, "%v\n", err)
+			fmt.Fprintf(errWriter, "%v\n", err)
 		}
 	}
 }

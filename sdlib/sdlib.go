@@ -323,3 +323,41 @@ func SweepDirectory(directoryToSweep string, expiryMonths int, outWriter io.Writ
 
 	return nil
 }
+
+func GetWriters(logsDir string) (io.Writer, io.Writer, error) {
+	if len(logsDir) > 0 {
+		rootLogFolder, err := filepath.Abs(logsDir)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if _, err := os.Stat(rootLogFolder); os.IsNotExist(err) {
+			fmt.Printf("Making root logs directory '%v'\n", rootLogFolder)
+			os.Mkdir(rootLogFolder, 0755)
+		}
+
+		sdLogFolder := filepath.Join(rootLogFolder, "staydeleted")
+		if _, err := os.Stat(sdLogFolder); os.IsNotExist(err) {
+			fmt.Printf("Making staydeleted logs directory '%v'\n", sdLogFolder)
+			os.Mkdir(sdLogFolder, 0755)
+		}
+
+		timeStr := time.Now().Format("2006-01-02_15.04.05")
+		outLogFileName := filepath.Join(sdLogFolder, fmt.Sprintf("%s.log", timeStr))
+		errLogFileName := filepath.Join(sdLogFolder, fmt.Sprintf("%s.err", timeStr))
+
+		outLogFile, err := os.Create(outLogFileName)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		errLogFile, err := os.Create(errLogFileName)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return outLogFile, errLogFile, nil
+	} else {
+		return os.Stdout, os.Stderr, nil
+	}
+}
