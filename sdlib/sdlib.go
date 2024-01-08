@@ -186,11 +186,20 @@ func SweepFrom(sweepFromFileName string, expiryMonths int, outWriter io.Writer, 
 }
 
 func SweepDirectory(directoryToSweep string, expiryMonths int, outWriter io.Writer, errWriter io.Writer, verbose bool) error {
+	stat, err := os.Stat(directoryToSweep)
+	if err != nil {
+		return err
+	}
+
+	if !stat.IsDir() {
+		return fmt.Errorf("%s is not a directory", directoryToSweep)
+	}
+
 	type fileToDelete struct {
 		Path, SDFile string
 	}
 
-	var absDirectoryToSweep, err = filepath.Abs(directoryToSweep)
+	absDirectoryToSweep, err := filepath.Abs(directoryToSweep)
 	if err != nil {
 		fmt.Fprintf(errWriter, "Unable to find the absolute path for '%v' - '%v'!\n",
 			directoryToSweep, err)

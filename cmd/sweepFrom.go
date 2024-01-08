@@ -69,7 +69,7 @@ func sweepFromPaths(paths []string, outWriter io.Writer, errWriter io.Writer) {
 		if stat.IsDir() {
 			fmt.Fprintf(errWriter, "%v\n is a directory!", path)
 		} else {
-			err := sdlib.SweepDirectory(path, ExpiryMonths, outWriter, errWriter, Verbose)
+			err := sdlib.SweepFrom(path, ExpiryMonths, outWriter, errWriter, Verbose)
 			if err != nil {
 				fmt.Fprintf(errWriter, "%v\n", err)
 			}

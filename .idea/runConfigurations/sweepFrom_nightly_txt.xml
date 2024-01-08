@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="sweepFrom nightly.txt" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="staydeleted" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="sweepFrom C:\Users\rober\OneDrive\local-scripts\cynane\staydeleted\nightly.txt" />
+    <kind value="PACKAGE" />
+    <package value="github.com/robert-impey/staydeleted" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>
