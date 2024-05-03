@@ -1,5 +1,9 @@
 # staydeleted
 
+Development has moved to
+
+https://github.com/robert-impey/tools
+
 To make sure that files stay deleted.
 
 This is useful for folders that are synched in both directions with backup disks on a regular schedule.
